@@ -1,0 +1,32 @@
+import numpy as np
+
+"""
+Referências:
+
+BANCROFT, Randy. Microstrip and Printed Antenna Design. Ed. 3°. EUA: The Institute of Engineering and Technology, 2019.
+ROGERS CORPORATION. RT/duroid® 5870 /5880: High Frequency Laminates. Disponível em: https://www.rogerscorp.com/advanced-electronics-solutions/rt-duroid-laminates/rt-duroid-5880-laminates
+"""
+
+w = 2.3 # (mm), Largura da linha de microfita (ficar atualizando para chegar no objetivo = 50Ω)
+h = 0.787 # (mm) Espessura do substrato (Verificar as dimensões disponíveis na industria)
+er = 2.2 # Constante dielétrica do RT/duroid 5880
+t = 0.035 # (mm) Espessura padrão do cobre em uma placa de circuito impresso
+
+"""
+Inicio do processo de determinação da impedância característica Z0
+"""
+pi = np.pi
+
+a = (1+(1/er))/2
+
+# Cálculo do fator de correção da largura
+delta_w = (t/pi)*(1+np.log(4/np.sqrt((t/h)**2+(1/(pi*((w/t)+1.1)))**2)))
+
+# Largura efetiva
+w_ = w+a*delta_w
+
+b = ((14+8/er)/11)*(4*h/w_)
+
+Z0 = (42.4/np.sqrt(er+1))*np.log(1+(4*h/w_)*(b+np.sqrt(b**2+a*pi**2)))
+
+print(f'Impedância Característica = {Z0:.2f} Ω')

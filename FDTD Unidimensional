@@ -1,0 +1,48 @@
+import numpy as np
+import matplotlib.pyplot as plt
+"""
+  Cálculo do campo magnético (Hx) e elétrico (Ey) uma onda propagante unidimensional utilizando o método de diferenças finitas
+""
+c = 299792458 # Velocidade da luz no vácuo (m/s)
+mu = 4 * np.pi * 1e-7 # Permeabilidade magnética do vácuo (H/m)
+e = 8.85418782e-12 # Permissividade elétrica do vácuo (F/m)
+
+i_max = 4000 # Número de pontos do espaço
+n_max = 9000 # Número de pontos do tempo
+
+dz = 0.001 # Passo no espaço
+dt = 0.9 * (dz/c) # Passo no tempo
+
+T = n_max * dt / 10 # Tempo real máximo
+
+Hx = np.zeros(i_max) # Campo magnético
+Ey = np.zeros(i_max) # Campo Elétrico
+fonte = int(np.rint(i_max/2)) # Localização da fonte
+
+plt.figure(1, figsize=(10, 5))
+for n in range(n_max):
+
+    for i in range(i_max - 1):
+        Hx[i] += (dt / mu) * (Ey[i + 1] - Ey[i]) / dz
+
+    for i in range(1, i_max):
+        Ey[i] += (dt / e) * (Hx[i] - Hx[i - 1]) / dz
+
+    Ey[fonte] = np.exp(-((n * dt - 3 * T)**2) / T**2)
+
+    Ey[0] = 0
+    Ey[-1] = 0
+
+    if n % 50 == 0:
+        plt.clf()
+        plt.plot(Ey, 'k')
+        plt.title(f'{n*dt}')
+        plt.xlabel("Posição (dz)")
+        plt.ylabel("Amplitude (V/m)")
+        plt.ylim([-1.1, 1.1])
+        plt.xlim([0, i_max])
+        plt.grid(True)
+        plt.legend(["Campo Elétrico (Ey)"], loc='upper right')
+        plt.pause(0.1)
+
+plt.show()

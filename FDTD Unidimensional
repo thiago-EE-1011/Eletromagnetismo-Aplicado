@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects
 
 """
-  Cálculo das equações de Maxwell via Método dos campos elétrico (Ez) e magnético (Hy) utilizando de Diferenças Finitas - FDTD
+  Cálculo das equações de Maxwell dos campos elétrico (Ez) e magnético (Hy) utilizando o Método Diferenças Finitas - FDTD
   Refências: 
   TAFLOVE, A; Hagness, S. Computational Electrodynamics: The Finite-Difference Time-Domain Method. 2 ed. Boston: Artech House, 2000.
   MUR, G. Absorbing boundary conditions for the finite-difference approximation of the time-domain electromagnetic-field equations. IEEE Transactions on Electromagnetic Compatibility, New York, v. EMC-23, n. 4, p. 377-382, nov. 1981.

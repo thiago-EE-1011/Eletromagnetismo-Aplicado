@@ -4,47 +4,63 @@ import matplotlib.patheffects as path_effects
 
 """
   Cálculo dos campos elétrico (Ez) e magnético (Hy) pelas equações de Maxwell via Método de Diferenças Finitas - FDTD
-  Refências: Taflavo, A; Hagness, S. Computational Electrodynamics: The Finite-Difference Time-Domain Method. 2 ed. Boston: Artech House, 2000.
+  Refências: 
+  Taflove, A; Hagness, S. Computational Electrodynamics: The Finite-Difference Time-Domain Method. 2 ed. Boston: Artech House, 2000.
+  MUR, G. Absorbing boundary conditions for the finite-difference approximation of the time-domain electromagnetic-field equations. IEEE Transactions on Electromagnetic Compatibility, New York, v. EMC-23, n. 4, p. 377-382, nov. 1981.
 """
 
 mu = 4 * np.pi * 1e-7 # Permeabilidade magnética do vácuo (H/m)
 e = 8.85418782e-12 # Permissividade elétrica do vácuo (F/m)
-c = 1/np.sqrt(mu*e) # Velocidade da luz no vácuo (m/s)
+c0 = 1/np.sqrt(mu*e) # Velocidade da luz no vácuo (m/s)
+
 
 i_max = 4500 # Número de pontos do espaço
 n_max = 4000 # Número de pontos do tempo
 
-dz = 0.001 # Passo no espaço
-dt = 0.9 * (dz/c) # Passo no tempo
+dx = 0.001 # Passo no espaço
+dt = 0.9 * (dx/c0) # Passo no tempo
 
 T = n_max * dt / 10 # Tempo real máximo
-
+x = np.arange(0,dx*(i_max+1), dx)
 Ez = np.zeros(i_max+1) # Campo Elétrico
 Hy = np.zeros(i_max) # Campo magnético
 fonte =  np.rint(i_max/2).astype('uint') # Localização da fonte
 
+# Para que não haja reflexões, utilizar o Método de Mur de primeira ordem
+#Cmur = (c0*dt-dx)/(c0*dt+dx)
+
 plt.figure(1, figsize=(10, 5))
 for n in range(n_max):
 
-    Hy[0:-1] = Hy[0:-1] +  (dt / (mu * dz)) * (Ez[1:-1] - Ez[0:-2])
-    Ez[1:-2] = Ez[1:-2] + (dt / (e * dz)) * (Hy[1:-1] - Hy[0:-2])
+    # Variáveis para o Método de Mur
+    """
+    Ez_p = Ez[0]
+    Ez_s =Ez[1]
+    Ez_u = Ez[-1]
+    Ez_pu = Ez[-2]
+    """
+    Hy[0:i_max] = Hy[0:i_max] + (dt / (mu * dx)) * (Ez[1:i_max+1] - Ez[0:i_max])
+    Ez[1:i_max] = Ez[1:i_max] + (dt / (e * dx)) * (Hy[1:i_max] - Hy[0:i_max-1])
 
-    Ez[fonte-1] = Ez[fonte-1] + np.exp(-((n * dt - 3 * T) ** 2) / (T ** 2))
+    Ez[fonte] = Ez[fonte] + np.exp(-((n * dt - 3 * T) ** 2) / (T ** 2))
 
-    Ez[0] = 0
-    Ez[-1] = 0
+    # Condição de contorno Absorvente
+    """
+    Ez[0] = Ez_s + Cmur*(Ez[1]-Ez_p)
+    Ez[-1] = Ez_pu + Cmur*(Ez[-2]-Ez_u)
+    """
 
     if n % 50 == 0:
         plt.clf()
-        plt.plot(Ez, 'k', linewidth=2, path_effects=[path_effects.SimpleLineShadow(),
+        plt.plot(x,Ez, 'b', linewidth=2, path_effects=[path_effects.SimpleLineShadow(),
                        path_effects.Normal()])
-        plt.title(f'{n*dt:.5f}')
-        plt.xlabel("Posição (dz)")
+        plt.title(f'Tempo {n*dt*10e6:.3f} (us)')
+        plt.xlabel("Posição dx (m)")
         plt.ylabel("Amplitude (V/m)")
         plt.ylim([-1.1, 1.1])
-        plt.xlim([0, i_max])
+        plt.xlim([0, dx*(i_max+1)])
         plt.grid(True)
-        plt.legend(["Campo Elétrico (Ey)"], loc='upper right')
+        plt.legend(["Campo Elétrico (Ez)"], loc='upper right')
         plt.pause(0.1)
 
 plt.show()

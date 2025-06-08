@@ -5,8 +5,8 @@ import matplotlib.patheffects as path_effects
 """
   Cálculo dos campos elétrico (Ez) e magnético (Hy) pelas equações de Maxwell via Método de Diferenças Finitas - FDTD
   Refências: 
-  Taflove, A; Hagness, S. Computational Electrodynamics: The Finite-Difference Time-Domain Method. 2 ed. Boston: Artech House, 2000.
-  Mur, G. Absorbing boundary conditions for the finite-difference approximation of the time-domain electromagnetic-field equations. IEEE Transactions on Electromagnetic Compatibility, New York, v. EMC-23, n. 4, p. 377-382, nov. 1981.
+  TAFLOVE, A; Hagness, S. Computational Electrodynamics: The Finite-Difference Time-Domain Method. 2 ed. Boston: Artech House, 2000.
+  MUR, G. Absorbing boundary conditions for the finite-difference approximation of the time-domain electromagnetic-field equations. IEEE Transactions on Electromagnetic Compatibility, New York, v. EMC-23, n. 4, p. 377-382, nov. 1981.
 """
 
 mu = 4 * np.pi * 1e-7 # Permeabilidade magnética do vácuo (H/m)

@@ -1,42 +1,44 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patheffects as path_effects
+
 """
-  Cálculo do campo magnético (Hx) e elétrico (Ey) uma onda propagante unidimensional utilizando o método de diferenças finitas
-""
-c = 299792458 # Velocidade da luz no vácuo (m/s)
+  Cálculo dos campos elétrico (Ez) e magnético (Hy) pelas equações de Maxwell via Método de Diferenças Finitas - FDTD
+  Refências: Taflavo, A; Hagness, S. Computational Electrodynamics: The Finite-Difference Time-Domain Method. 2 ed. Boston: Artech House, 2000.
+"""
+
 mu = 4 * np.pi * 1e-7 # Permeabilidade magnética do vácuo (H/m)
 e = 8.85418782e-12 # Permissividade elétrica do vácuo (F/m)
+c = 1/np.sqrt(mu*e) # Velocidade da luz no vácuo (m/s)
 
-i_max = 4000 # Número de pontos do espaço
-n_max = 9000 # Número de pontos do tempo
+i_max = 4500 # Número de pontos do espaço
+n_max = 4000 # Número de pontos do tempo
 
 dz = 0.001 # Passo no espaço
 dt = 0.9 * (dz/c) # Passo no tempo
 
 T = n_max * dt / 10 # Tempo real máximo
 
-Hx = np.zeros(i_max) # Campo magnético
-Ey = np.zeros(i_max) # Campo Elétrico
-fonte = int(np.rint(i_max/2)) # Localização da fonte
+Ez = np.zeros(i_max+1) # Campo Elétrico
+Hy = np.zeros(i_max) # Campo magnético
+fonte =  np.rint(i_max/2).astype('uint') # Localização da fonte
 
 plt.figure(1, figsize=(10, 5))
 for n in range(n_max):
 
-    for i in range(i_max - 1):
-        Hx[i] += (dt / mu) * (Ey[i + 1] - Ey[i]) / dz
+    Hy[0:-1] = Hy[0:-1] +  (dt / (mu * dz)) * (Ez[1:-1] - Ez[0:-2])
+    Ez[1:-2] = Ez[1:-2] + (dt / (e * dz)) * (Hy[1:-1] - Hy[0:-2])
 
-    for i in range(1, i_max):
-        Ey[i] += (dt / e) * (Hx[i] - Hx[i - 1]) / dz
+    Ez[fonte-1] = Ez[fonte-1] + np.exp(-((n * dt - 3 * T) ** 2) / (T ** 2))
 
-    Ey[fonte] = np.exp(-((n * dt - 3 * T)**2) / T**2)
-
-    Ey[0] = 0
-    Ey[-1] = 0
+    Ez[0] = 0
+    Ez[-1] = 0
 
     if n % 50 == 0:
         plt.clf()
-        plt.plot(Ey, 'k')
-        plt.title(f'{n*dt}')
+        plt.plot(Ez, 'k', linewidth=2, path_effects=[path_effects.SimpleLineShadow(),
+                       path_effects.Normal()])
+        plt.title(f'{n*dt:.5f}')
         plt.xlabel("Posição (dz)")
         plt.ylabel("Amplitude (V/m)")
         plt.ylim([-1.1, 1.1])
